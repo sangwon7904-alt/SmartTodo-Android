@@ -1,23 +1,31 @@
 package com.example.smarttodo.viewmodel
 
-import androidx.compose.runtime.mutableStateListOf
 import com.example.smarttodo.data.model.Todo
+import com.example.smarttodo.data.storage.TodoStorage
 
-class TodoViewModel {
+class TodoViewModel(
+    private val todoStorage: TodoStorage
+) {
+    private var nextId = 1
 
-    private var nextId = 5
+    val todoList = androidx.compose.runtime.mutableStateListOf<Todo>()
 
-    val todoList = mutableStateListOf(
-        Todo(1, "운동하기"),
-        Todo(2, "영어 공부"),
-        Todo(3, "장보기"),
-        Todo(4, "독서하기")
-    )
+    init {
+        val savedTodos = todoStorage.loadTodos()
+        todoList.addAll(savedTodos)
+
+        nextId = if (savedTodos.isEmpty()) {
+            1
+        } else {
+            savedTodos.maxOf { it.id } + 1
+        }
+    }
 
     fun toggleTodo(todo: Todo) {
         val index = todoList.indexOfFirst { it.id == todo.id }
         if (index != -1) {
             todoList[index] = todo.copy(isCompleted = !todo.isCompleted)
+            saveTodos()
         }
     }
 
@@ -31,8 +39,15 @@ class TodoViewModel {
             )
         )
         nextId++
+        saveTodos()
     }
+
     fun deleteTodo(todo: Todo) {
         todoList.remove(todo)
+        saveTodos()
+    }
+
+    private fun saveTodos() {
+        todoStorage.saveTodos(todoList)
     }
 }

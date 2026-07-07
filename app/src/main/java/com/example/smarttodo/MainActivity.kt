@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import com.example.smarttodo.ui.screen.MainScreen
 import com.example.smarttodo.ui.theme.SmartTodoTheme
 import com.example.smarttodo.viewmodel.TodoViewModel
+import com.example.smarttodo.data.storage.TodoStorage
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,7 +16,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SmartTodoTheme {
-                val todoViewModel = remember { TodoViewModel() }
+                val todoStorage = remember { TodoStorage(this@MainActivity) }
+                val todoViewModel = remember { TodoViewModel(todoStorage) }
                 MainScreen(todoViewModel = todoViewModel)
             }
         }
