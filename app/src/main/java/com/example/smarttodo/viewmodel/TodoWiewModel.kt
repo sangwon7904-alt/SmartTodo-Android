@@ -21,11 +21,13 @@ class TodoViewModel {
         }
     }
 
-    fun addTodo() {
+    fun addTodo(title: String) {
+        if (title.isBlank()) return
+
         todoList.add(
             Todo(
                 id = nextId,
-                title = "새 할 일 $nextId"
+                title = title
             )
         )
         nextId++
