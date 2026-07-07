@@ -21,19 +21,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.smarttodo.data.model.Todo
 import com.example.smarttodo.ui.components.TodoItem
 import com.example.smarttodo.viewmodel.TodoViewModel
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
-    var showDialog by remember { mutableStateOf(false) }
+    var showAddDialog by remember { mutableStateOf(false) }
     var todoText by remember { mutableStateOf("") }
+    var todoToDelete by remember { mutableStateOf<Todo?>(null) }
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    showDialog = true
+                    showAddDialog = true
                 }
             ) {
                 Text("+", fontSize = 28.sp)
@@ -60,22 +62,37 @@ fun MainScreen(todoViewModel: TodoViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val totalCount = todoViewModel.todoList.size
+            val completedCount = todoViewModel.todoList.count { it.isCompleted }
+            val remainingCount = totalCount - completedCount
+            val sortedTodoList = todoViewModel.todoList.sortedBy { it.isCompleted }
+
+            Text(
+                text = "전체 ${totalCount}개 · 완료 ${completedCount}개 · 남은 ${remainingCount}개",
+                fontSize = 14.sp
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             LazyColumn {
-                items(todoViewModel.todoList) { todo ->
+                items(sortedTodoList) { todo ->
                     TodoItem(
                         todo = todo,
                         onCheckedChange = {
                             todoViewModel.toggleTodo(todo)
+                        },
+                        onLongClick = {
+                            todoToDelete = todo
                         }
                     )
                 }
             }
         }
 
-        if (showDialog) {
+        if (showAddDialog) {
             AlertDialog(
                 onDismissRequest = {
-                    showDialog = false
+                    showAddDialog = false
                     todoText = ""
                 },
                 title = {
@@ -98,7 +115,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                         onClick = {
                             todoViewModel.addTodo(todoText)
                             todoText = ""
-                            showDialog = false
+                            showAddDialog = false
                         }
                     ) {
                         Text("저장")
@@ -108,7 +125,42 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                     TextButton(
                         onClick = {
                             todoText = ""
-                            showDialog = false
+                            showAddDialog = false
+                        }
+                    ) {
+                        Text("취소")
+                    }
+                }
+            )
+        }
+
+        if (todoToDelete != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    todoToDelete = null
+                },
+                title = {
+                    Text("할 일 삭제")
+                },
+                text = {
+                    Text("'${todoToDelete?.title}'을 삭제하시겠습니까?")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            todoToDelete?.let {
+                                todoViewModel.deleteTodo(it)
+                            }
+                            todoToDelete = null
+                        }
+                    ) {
+                        Text("삭제")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            todoToDelete = null
                         }
                     ) {
                         Text("취소")

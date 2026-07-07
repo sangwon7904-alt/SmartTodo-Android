@@ -32,4 +32,7 @@ class TodoViewModel {
         )
         nextId++
     }
+    fun deleteTodo(todo: Todo) {
+        todoList.remove(todo)
+    }
 }

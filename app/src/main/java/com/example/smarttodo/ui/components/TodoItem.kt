@@ -1,5 +1,7 @@
 package com.example.smarttodo.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,14 +17,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarttodo.data.model.Todo
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TodoItem(
     todo: Todo,
-    onCheckedChange: () -> Unit
+    onCheckedChange: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .combinedClickable(
+                onClick = {},
+                onLongClick = onLongClick
+            )
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
