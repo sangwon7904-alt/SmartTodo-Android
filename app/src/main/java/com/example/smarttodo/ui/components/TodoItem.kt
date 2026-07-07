@@ -10,11 +10,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.smarttodo.data.model.Todo
 
 @Composable
-fun TodoItem(title: String) {
+fun TodoItem(
+    todo: Todo,
+    onCheckedChange: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -22,15 +27,20 @@ fun TodoItem(title: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
-            checked = false,
-            onCheckedChange = { }
+            checked = todo.isCompleted,
+            onCheckedChange = { onCheckedChange() }
         )
 
         Spacer(modifier = Modifier.width(8.dp))
 
         Text(
-            text = title,
-            fontSize = 18.sp
+            text = todo.title,
+            fontSize = 18.sp,
+            textDecoration = if (todo.isCompleted) {
+                TextDecoration.LineThrough
+            } else {
+                TextDecoration.None
+            }
         )
     }
 }

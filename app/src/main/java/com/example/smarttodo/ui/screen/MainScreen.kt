@@ -1,6 +1,10 @@
 package com.example.smarttodo.ui.screen
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FloatingActionButton
@@ -11,19 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarttodo.ui.components.TodoItem
+import com.example.smarttodo.viewmodel.TodoViewModel
 
 @Composable
-fun MainScreen() {
-    val todoList = listOf(
-        "운동하기",
-        "영어 공부",
-        "장보기",
-        "독서하기"
-    )
-
+fun MainScreen(todoViewModel: TodoViewModel) {
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { }) {
+            FloatingActionButton(
+                onClick = {
+                    todoViewModel.addTodo()
+                }
+            ) {
                 Text("+", fontSize = 28.sp)
             }
         }
@@ -49,8 +51,13 @@ fun MainScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyColumn {
-                items(todoList) { todo ->
-                    TodoItem(title = todo)
+                items(todoViewModel.todoList) { todo ->
+                    TodoItem(
+                        todo = todo,
+                        onCheckedChange = {
+                            todoViewModel.toggleTodo(todo)
+                        }
+                    )
                 }
             }
         }
