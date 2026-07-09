@@ -30,6 +30,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var showAddDialog by remember { mutableStateOf(false) }
     var todoText by remember { mutableStateOf("") }
     var todoToDelete by remember { mutableStateOf<Todo?>(null) }
+    var searchText by remember { mutableStateOf("") }
 
     Scaffold(
         floatingActionButton = {
@@ -65,11 +66,29 @@ fun MainScreen(todoViewModel: TodoViewModel) {
             val totalCount = todoViewModel.todoList.size
             val completedCount = todoViewModel.todoList.count { it.isCompleted }
             val remainingCount = totalCount - completedCount
-            val sortedTodoList = todoViewModel.todoList.sortedBy { it.isCompleted }
+
+            val filteredTodoList = todoViewModel.todoList.filter {
+                it.title.contains(searchText, ignoreCase = true)
+            }
+
+            val sortedTodoList = filteredTodoList.sortedBy { it.isCompleted }
 
             Text(
                 text = "전체 ${totalCount}개 · 완료 ${completedCount}개 · 남은 ${remainingCount}개",
                 fontSize = 14.sp
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = {
+                    searchText = it
+                },
+                label = {
+                    Text("검색")
+                },
+                singleLine = true
             )
 
             Spacer(modifier = Modifier.height(12.dp))
