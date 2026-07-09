@@ -95,21 +95,37 @@ fun MainScreen(todoViewModel: TodoViewModel) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            LazyColumn {
-                items(sortedTodoList) { todo ->
-                    TodoItem(
-                        todo = todo,
-                        onCheckedChange = {
-                            todoViewModel.toggleTodo(todo)
-                        },
-                        onClick = {
-                            todoToEdit = todo
-                            editText = todo.title
-                        },
-                        onLongClick = {
-                            todoToDelete = todo
-                        }
-                    )
+            if (sortedTodoList.isEmpty()) {
+                Spacer(modifier = Modifier.height(40.dp))
+
+                Text(
+                    text = "아직 할 일이 없습니다.",
+                    fontSize = 18.sp
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "+ 버튼을 눌러 새 할 일을 추가하세요.",
+                    fontSize = 14.sp
+                )
+            } else {
+                LazyColumn {
+                    items(sortedTodoList) { todo ->
+                        TodoItem(
+                            todo = todo,
+                            onCheckedChange = {
+                                todoViewModel.toggleTodo(todo)
+                            },
+                            onClick = {
+                                todoToEdit = todo
+                                editText = todo.title
+                            },
+                            onLongClick = {
+                                todoToDelete = todo
+                            }
+                        )
+                    }
                 }
             }
         }
