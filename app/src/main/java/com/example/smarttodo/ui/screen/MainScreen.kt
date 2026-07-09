@@ -31,6 +31,8 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var todoText by remember { mutableStateOf("") }
     var todoToDelete by remember { mutableStateOf<Todo?>(null) }
     var searchText by remember { mutableStateOf("") }
+    var todoToEdit by remember { mutableStateOf<Todo?>(null) }
+    var editText by remember { mutableStateOf("") }
 
     Scaffold(
         floatingActionButton = {
@@ -99,6 +101,10 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                         todo = todo,
                         onCheckedChange = {
                             todoViewModel.toggleTodo(todo)
+                        },
+                        onClick = {
+                            todoToEdit = todo
+                            editText = todo.title
                         },
                         onLongClick = {
                             todoToDelete = todo
@@ -180,6 +186,52 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                     TextButton(
                         onClick = {
                             todoToDelete = null
+                        }
+                    ) {
+                        Text("취소")
+                    }
+                }
+            )
+        }
+        if (todoToEdit != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    todoToEdit = null
+                    editText = ""
+                },
+                title = {
+                    Text("할 일 수정")
+                },
+                text = {
+                    OutlinedTextField(
+                        value = editText,
+                        onValueChange = {
+                            editText = it
+                        },
+                        label = {
+                            Text("수정할 내용")
+                        },
+                        singleLine = true
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            todoToEdit?.let {
+                                todoViewModel.updateTodo(it, editText)
+                            }
+                            todoToEdit = null
+                            editText = ""
+                        }
+                    ) {
+                        Text("저장")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            todoToEdit = null
+                            editText = ""
                         }
                     ) {
                         Text("취소")

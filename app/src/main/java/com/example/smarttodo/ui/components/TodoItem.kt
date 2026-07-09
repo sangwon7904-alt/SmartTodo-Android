@@ -22,13 +22,14 @@ import com.example.smarttodo.data.model.Todo
 fun TodoItem(
     todo: Todo,
     onCheckedChange: () -> Unit,
+    onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(
-                onClick = {},
+                onClick = onClick,
                 onLongClick = onLongClick
             )
             .padding(vertical = 10.dp),
