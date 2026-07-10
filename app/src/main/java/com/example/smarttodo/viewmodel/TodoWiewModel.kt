@@ -48,12 +48,21 @@ class TodoViewModel(
         saveTodos()
     }
 
-    fun updateTodo(todo: Todo, newTitle: String) {
+    fun updateTodo(
+        todo: Todo,
+        newTitle: String,
+        newPriority: Int
+    ) {
         if (newTitle.isBlank()) return
 
         val index = todoList.indexOfFirst { it.id == todo.id }
+
         if (index != -1) {
-            todoList[index] = todo.copy(title = newTitle)
+            todoList[index] = todo.copy(
+                title = newTitle,
+                priority = newPriority
+            )
+
             saveTodos()
         }
     }

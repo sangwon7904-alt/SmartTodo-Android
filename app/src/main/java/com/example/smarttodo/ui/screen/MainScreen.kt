@@ -37,6 +37,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var searchText by remember { mutableStateOf("") }
     var todoToEdit by remember { mutableStateOf<Todo?>(null) }
     var editText by remember { mutableStateOf("") }
+    var editPriority by remember { mutableStateOf(2) }
     var selectedPriority by remember { mutableStateOf(2) }
 
     Scaffold(
@@ -133,6 +134,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                             onClick = {
                                 todoToEdit = todo
                                 editText = todo.title
+                                editPriority = todo.priority
                             },
                             onLongClick = {
                                 todoToDelete = todo
@@ -266,27 +268,63 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 onDismissRequest = {
                     todoToEdit = null
                     editText = ""
+                    editPriority = 2
                 },
                 title = {
                     Text("할 일 수정")
                 },
                 text = {
-                    OutlinedTextField(
-                        value = editText,
-                        onValueChange = {
-                            editText = it
-                        },
-                        label = {
-                            Text("수정할 내용")
-                        },
-                        singleLine = true
-                    )
+                    Column {
+                        OutlinedTextField(
+                            value = editText,
+                            onValueChange = {
+                                editText = it
+                            },
+                            label = {
+                                Text("수정할 내용")
+                            },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text("우선순위")
+
+                        PriorityOption(
+                            text = "높음",
+                            selected = editPriority == 3,
+                            onClick = {
+                                editPriority = 3
+                            }
+                        )
+
+                        PriorityOption(
+                            text = "보통",
+                            selected = editPriority == 2,
+                            onClick = {
+                                editPriority = 2
+                            }
+                        )
+
+                        PriorityOption(
+                            text = "낮음",
+                            selected = editPriority == 1,
+                            onClick = {
+                                editPriority = 1
+                            }
+                        )
+                    }
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
                             todoToEdit?.let {
-                                todoViewModel.updateTodo(it, editText)
+                                todoViewModel.updateTodo(
+                                    todo = it,
+                                    newTitle = editText,
+                                    newPriority = editPriority
+                                )
                             }
                             todoToEdit = null
                             editText = ""
@@ -300,6 +338,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                         onClick = {
                             todoToEdit = null
                             editText = ""
+                            editPriority = 2
                         }
                     ) {
                         Text("취소")
