@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.RadioButton
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.FilterChip
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
@@ -39,6 +41,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var editText by remember { mutableStateOf("") }
     var editPriority by remember { mutableStateOf(2) }
     var selectedPriority by remember { mutableStateOf(2) }
+    var selectedFilter by remember { mutableStateOf("전체") }
 
     Scaffold(
         floatingActionButton = {
@@ -75,8 +78,17 @@ fun MainScreen(todoViewModel: TodoViewModel) {
             val completedCount = todoViewModel.todoList.count { it.isCompleted }
             val remainingCount = totalCount - completedCount
 
-            val filteredTodoList = todoViewModel.todoList.filter {
-                it.title.contains(searchText, ignoreCase = true)
+            val filteredTodoList = todoViewModel.todoList.filter { todo ->
+                val matchesSearch =
+                    todo.title.contains(searchText, ignoreCase = true)
+
+                val matchesFilter = when (selectedFilter) {
+                    "미완료" -> !todo.isCompleted
+                    "완료" -> todo.isCompleted
+                    else -> true
+                }
+
+                matchesSearch && matchesFilter
             }
 
             val sortedTodoList = filteredTodoList.sortedWith(
@@ -108,21 +120,63 @@ fun MainScreen(todoViewModel: TodoViewModel) {
             )
 
             Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = selectedFilter == "전체",
+                    onClick = {
+                        selectedFilter = "전체"
+                    },
+                    label = {
+                        Text("전체")
+                    }
+                )
+
+                FilterChip(
+                    selected = selectedFilter == "미완료",
+                    onClick = {
+                        selectedFilter = "미완료"
+                    },
+                    label = {
+                        Text("미완료")
+                    }
+                )
+
+                FilterChip(
+                    selected = selectedFilter == "완료",
+                    onClick = {
+                        selectedFilter = "완료"
+                    },
+                    label = {
+                        Text("완료")
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             if (sortedTodoList.isEmpty()) {
                 Spacer(modifier = Modifier.height(40.dp))
 
                 Text(
-                    text = "아직 할 일이 없습니다.",
+                    text = when (selectedFilter) {
+                        "미완료" -> "남아 있는 할 일이 없습니다."
+                        "완료" -> "완료한 할 일이 없습니다."
+                        else -> "아직 할 일이 없습니다."
+                    },
                     fontSize = 18.sp
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = "+ 버튼을 눌러 새 할 일을 추가하세요.",
-                    fontSize = 14.sp
-                )
+                if (selectedFilter == "전체" && searchText.isBlank()) {
+                    Text(
+                        text = "+ 버튼을 눌러 새 할 일을 추가하세요.",
+                        fontSize = 14.sp
+                    )
+                }
             } else {
                 LazyColumn {
                     items(sortedTodoList) { todo ->
