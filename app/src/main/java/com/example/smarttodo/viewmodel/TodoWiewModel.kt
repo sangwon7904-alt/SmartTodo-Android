@@ -29,13 +29,14 @@ class TodoViewModel(
         }
     }
 
-    fun addTodo(title: String) {
+    fun addTodo(title: String, priority: Int = 2) {
         if (title.isBlank()) return
 
         todoList.add(
             Todo(
                 id = nextId,
-                title = title
+                title = title,
+                priority = priority
             )
         )
         nextId++

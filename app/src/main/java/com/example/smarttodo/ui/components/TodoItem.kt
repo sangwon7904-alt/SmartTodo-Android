@@ -24,7 +24,8 @@ fun TodoItem(
     onCheckedChange: () -> Unit,
     onClick: () -> Unit,
     onLongClick: () -> Unit
-) {
+)
+{
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -41,6 +42,16 @@ fun TodoItem(
         )
 
         Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = when (todo.priority) {
+                3 -> "🔴"
+                2 -> "🟡"
+                else -> "🟢"
+            },
+            fontSize = 16.sp
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
 
         Text(
             text = todo.title,
@@ -50,6 +61,16 @@ fun TodoItem(
             } else {
                 TextDecoration.None
             }
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(
+            text = when (todo.priority) {
+                3 -> "⭐⭐⭐"
+                2 -> "⭐⭐"
+                else -> "⭐"
+            },
+            fontSize = 14.sp
         )
     }
 }

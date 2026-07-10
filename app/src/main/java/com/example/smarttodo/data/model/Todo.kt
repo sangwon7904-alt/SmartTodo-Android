@@ -3,5 +3,6 @@ package com.example.smarttodo.data.model
 data class Todo(
     val id: Int,
     val title: String,
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val priority: Int = 2
 )

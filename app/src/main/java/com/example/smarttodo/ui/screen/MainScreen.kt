@@ -24,6 +24,10 @@ import androidx.compose.ui.unit.sp
 import com.example.smarttodo.data.model.Todo
 import com.example.smarttodo.ui.components.TodoItem
 import com.example.smarttodo.viewmodel.TodoViewModel
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.RadioButton
+import androidx.compose.ui.Alignment
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
@@ -33,6 +37,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var searchText by remember { mutableStateOf("") }
     var todoToEdit by remember { mutableStateOf<Todo?>(null) }
     var editText by remember { mutableStateOf("") }
+    var selectedPriority by remember { mutableStateOf(2) }
 
     Scaffold(
         floatingActionButton = {
@@ -140,22 +145,57 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                     Text("새 할 일 추가")
                 },
                 text = {
-                    OutlinedTextField(
-                        value = todoText,
-                        onValueChange = {
-                            todoText = it
-                        },
-                        label = {
-                            Text("할 일을 입력하세요")
-                        },
-                        singleLine = true
-                    )
+                    Column {
+                        OutlinedTextField(
+                            value = todoText,
+                            onValueChange = {
+                                todoText = it
+                            },
+                            label = {
+                                Text("할 일을 입력하세요")
+                            },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text("우선순위")
+
+                        PriorityOption(
+                            text = "높음",
+                            selected = selectedPriority == 3,
+                            onClick = {
+                                selectedPriority = 3
+                            }
+                        )
+
+                        PriorityOption(
+                            text = "보통",
+                            selected = selectedPriority == 2,
+                            onClick = {
+                                selectedPriority = 2
+                            }
+                        )
+
+                        PriorityOption(
+                            text = "낮음",
+                            selected = selectedPriority == 1,
+                            onClick = {
+                                selectedPriority = 1
+                            }
+                        )
+                    }
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            todoViewModel.addTodo(todoText)
+                            todoViewModel.addTodo(
+                                title = todoText,
+                                priority = selectedPriority
+                            )
                             todoText = ""
+                            selectedPriority = 2
                             showAddDialog = false
                         }
                     ) {
@@ -178,7 +218,9 @@ fun MainScreen(todoViewModel: TodoViewModel) {
         if (todoToDelete != null) {
             AlertDialog(
                 onDismissRequest = {
-                    todoToDelete = null
+                    showAddDialog = false
+                    todoText = ""
+                    selectedPriority = 2
                 },
                 title = {
                     Text("할 일 삭제")
@@ -201,7 +243,9 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            todoToDelete = null
+                            todoText = ""
+                            selectedPriority = 2
+                            showAddDialog = false
                         }
                     ) {
                         Text("취소")
@@ -255,5 +299,23 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 }
             )
         }
+    }
+}
+@Composable
+private fun PriorityOption(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = onClick
+        )
+
+        Text(text = text)
     }
 }
