@@ -78,7 +78,15 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 it.title.contains(searchText, ignoreCase = true)
             }
 
-            val sortedTodoList = filteredTodoList.sortedBy { it.isCompleted }
+            val sortedTodoList = filteredTodoList.sortedWith(
+                compareBy<Todo> {
+                    if (it.isCompleted) 1 else 0
+                }.thenByDescending {
+                    it.priority
+                }.thenByDescending {
+                    it.id
+                }
+            )
 
             Text(
                 text = "전체 ${totalCount}개 · 완료 ${completedCount}개 · 남은 ${remainingCount}개",
