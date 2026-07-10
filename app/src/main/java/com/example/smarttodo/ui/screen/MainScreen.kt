@@ -228,9 +228,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
         if (todoToDelete != null) {
             AlertDialog(
                 onDismissRequest = {
-                    showAddDialog = false
-                    todoText = ""
-                    selectedPriority = 2
+                    todoToDelete = null
                 },
                 title = {
                     Text("할 일 삭제")
@@ -241,9 +239,10 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            todoToDelete?.let {
-                                todoViewModel.deleteTodo(it)
+                            todoToDelete?.let { todo ->
+                                todoViewModel.deleteTodo(todo)
                             }
+
                             todoToDelete = null
                         }
                     ) {
@@ -253,9 +252,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            todoText = ""
-                            selectedPriority = 2
-                            showAddDialog = false
+                            todoToDelete = null
                         }
                     ) {
                         Text("취소")
