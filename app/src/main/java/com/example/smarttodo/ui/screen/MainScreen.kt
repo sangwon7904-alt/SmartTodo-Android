@@ -170,8 +170,26 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 onValueChange = {
                     searchText = it
                 },
-                label = {
-                    Text("검색")
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = {
+                    Text("할 일 검색")
+                },
+                leadingIcon = {
+                    Text(
+                        text = "🔍",
+                        fontSize = 18.sp
+                    )
+                },
+                trailingIcon = {
+                    if (searchText.isNotEmpty()) {
+                        TextButton(
+                            onClick = {
+                                searchText = ""
+                            }
+                        ) {
+                            Text("✕")
+                        }
+                    }
                 },
                 singleLine = true
             )
