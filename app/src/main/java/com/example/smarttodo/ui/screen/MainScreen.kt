@@ -28,13 +28,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.RadioButton
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
@@ -47,6 +49,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var editPriority by remember { mutableStateOf(2) }
     var selectedPriority by remember { mutableStateOf(2) }
     var selectedFilter by remember { mutableStateOf("전체") }
+    val filterOptions = listOf("전체", "미완료", "완료")
 
 
     Scaffold(
@@ -196,51 +199,23 @@ fun MainScreen(todoViewModel: TodoViewModel) {
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                FilterChip(
-                    selected = selectedFilter == "전체",
-                    onClick = {
-                        selectedFilter = "전체"
-                    },
-                    label = {
-                        Text("전체")
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-
-                FilterChip(
-                    selected = selectedFilter == "미완료",
-                    onClick = {
-                        selectedFilter = "미완료"
-                    },
-                    label = {
-                        Text("미완료")
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-
-                FilterChip(
-                    selected = selectedFilter == "완료",
-                    onClick = {
-                        selectedFilter = "완료"
-                    },
-                    label = {
-                        Text("완료")
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
+                filterOptions.forEachIndexed { index, option ->
+                    SegmentedButton(
+                        selected = selectedFilter == option,
+                        onClick = {
+                            selectedFilter = option
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = filterOptions.size
+                        )
+                    ) {
+                        Text(option)
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
