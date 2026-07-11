@@ -30,6 +30,10 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
@@ -42,6 +46,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var editPriority by remember { mutableStateOf(2) }
     var selectedPriority by remember { mutableStateOf(2) }
     var selectedFilter by remember { mutableStateOf("전체") }
+
 
     Scaffold(
         floatingActionButton = {
@@ -77,6 +82,13 @@ fun MainScreen(todoViewModel: TodoViewModel) {
             val totalCount = todoViewModel.todoList.size
             val completedCount = todoViewModel.todoList.count { it.isCompleted }
             val remainingCount = totalCount - completedCount
+            val progress = if (totalCount == 0) {
+                0f
+            } else {
+                completedCount.toFloat() / totalCount.toFloat()
+            }
+
+            val progressPercent = (progress * 100).toInt()
 
             val filteredTodoList = todoViewModel.todoList.filter { todo ->
                 val matchesSearch =
@@ -101,12 +113,50 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 }
             )
 
-            Text(
-                text = "전체 ${totalCount}개 · 완료 ${completedCount}개 · 남은 ${remainingCount}개",
-                fontSize = 14.sp
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "오늘의 진행 상황",
+                        fontSize = 18.sp
+                    )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${completedCount}개 완료 · ${remainingCount}개 남음",
+                            fontSize = 14.sp
+                        )
+
+                        Text(
+                            text = "${progressPercent}%",
+                            fontSize = 16.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = searchText,
