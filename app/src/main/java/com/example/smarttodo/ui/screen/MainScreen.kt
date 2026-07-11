@@ -34,6 +34,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChipDefaults
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
@@ -206,7 +207,11 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                     },
                     label = {
                         Text("전체")
-                    }
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 )
 
                 FilterChip(
@@ -216,7 +221,11 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                     },
                     label = {
                         Text("미완료")
-                    }
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 )
 
                 FilterChip(
@@ -226,7 +235,11 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                     },
                     label = {
                         Text("완료")
-                    }
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 )
             }
 
