@@ -242,7 +242,10 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 }
             } else {
                 LazyColumn {
-                    items(sortedTodoList) { todo ->
+                    items(
+                        items = sortedTodoList,
+                        key = { todo -> todo.id }
+                    ) { todo ->
                         TodoItem(
                             todo = todo,
                             onCheckedChange = {
@@ -255,7 +258,8 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                             },
                             onLongClick = {
                                 todoToDelete = todo
-                            }
+                            },
+                            modifier = Modifier.animateItem()
                         )
                     }
                 }

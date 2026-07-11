@@ -27,10 +27,11 @@ fun TodoItem(
     todo: Todo,
     onCheckedChange: () -> Unit,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .combinedClickable(
