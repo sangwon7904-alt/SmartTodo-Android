@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -27,11 +26,11 @@ import com.example.smarttodo.ui.components.DeleteTodoDialog
 import com.example.smarttodo.ui.components.EditTodoDialog
 import com.example.smarttodo.ui.components.ProgressSummaryCard
 import com.example.smarttodo.ui.components.TodoFilterSection
-import com.example.smarttodo.ui.components.TodoSearchField
-import com.example.smarttodo.viewmodel.TodoViewModel
 import com.example.smarttodo.ui.components.TodoListSection
+import com.example.smarttodo.ui.components.TodoSearchField
+import com.example.smarttodo.util.processTodoList
+import com.example.smarttodo.viewmodel.TodoViewModel
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
@@ -43,7 +42,6 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     val filterOptions = listOf("전체", "미완료", "완료")
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-
 
     Scaffold(
         snackbarHost = {
@@ -97,27 +95,10 @@ fun MainScreen(todoViewModel: TodoViewModel) {
 
             val progressPercent = (progress * 100).toInt()
 
-            val filteredTodoList = todoViewModel.todoList.filter { todo ->
-                val matchesSearch =
-                    todo.title.contains(searchText, ignoreCase = true)
-
-                val matchesFilter = when (selectedFilter) {
-                    "미완료" -> !todo.isCompleted
-                    "완료" -> todo.isCompleted
-                    else -> true
-                }
-
-                matchesSearch && matchesFilter
-            }
-
-            val sortedTodoList = filteredTodoList.sortedWith(
-                compareBy<Todo> {
-                    if (it.isCompleted) 1 else 0
-                }.thenByDescending {
-                    it.priority
-                }.thenByDescending {
-                    it.id
-                }
+            val sortedTodoList = processTodoList(
+                todos = todoViewModel.todoList,
+                searchText = searchText,
+                selectedFilter = selectedFilter
             )
             ProgressSummaryCard(
                 completedCount = completedCount,
