@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarttodo.data.model.Todo
 import com.example.smarttodo.ui.components.AddTodoDialog
+import com.example.smarttodo.ui.components.DeleteTodoDialog
 import com.example.smarttodo.ui.components.EditTodoDialog
 import com.example.smarttodo.ui.components.ProgressSummaryCard
 import com.example.smarttodo.ui.components.TodoFilterSection
@@ -210,50 +209,26 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 }
             )
         }
-        if (todoToDelete != null) {
-            AlertDialog(
-                onDismissRequest = {
+        todoToDelete?.let { todo ->
+            DeleteTodoDialog(
+                todo = todo,
+                onDismiss = {
                     todoToDelete = null
                 },
-                title = {
-                    Text("할 일 삭제")
-                },
-                text = {
-                    Text("'${todoToDelete?.title}'을 삭제하시겠습니까?")
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            val deletedTodo = todoToDelete
+                onConfirm = {
+                    todoViewModel.deleteTodo(todo)
+                    todoToDelete = null
 
-                            if (deletedTodo != null) {
-                                todoViewModel.deleteTodo(deletedTodo)
-                                todoToDelete = null
+                    coroutineScope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = "할 일을 삭제했습니다.",
+                            actionLabel = "실행 취소",
+                            withDismissAction = true
+                        )
 
-                                coroutineScope.launch {
-                                    val result = snackbarHostState.showSnackbar(
-                                        message = "할 일을 삭제했습니다.",
-                                        actionLabel = "실행 취소",
-                                        withDismissAction = true
-                                    )
-
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        todoViewModel.restoreTodo(deletedTodo)
-                                    }
-                                }
-                            }
+                        if (result == SnackbarResult.ActionPerformed) {
+                            todoViewModel.restoreTodo(todo)
                         }
-                    ) {
-                        Text("삭제")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            todoToDelete = null
-                        }
-                    ) {
-                        Text("취소")
                     }
                 }
             )
