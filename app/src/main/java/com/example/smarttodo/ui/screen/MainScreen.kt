@@ -30,6 +30,7 @@ import com.example.smarttodo.ui.components.TodoListSection
 import com.example.smarttodo.ui.components.TodoSearchField
 import com.example.smarttodo.util.processTodoList
 import com.example.smarttodo.viewmodel.TodoViewModel
+import com.example.smarttodo.util.calculateTodoProgress
 import kotlinx.coroutines.launch
 
 @Composable
@@ -84,16 +85,9 @@ fun MainScreen(todoViewModel: TodoViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val totalCount = todoViewModel.todoList.size
-            val completedCount = todoViewModel.todoList.count { it.isCompleted }
-            val remainingCount = totalCount - completedCount
-            val progress = if (totalCount == 0) {
-                0f
-            } else {
-                completedCount.toFloat() / totalCount.toFloat()
-            }
-
-            val progressPercent = (progress * 100).toInt()
+            val todoProgress = calculateTodoProgress(
+                todos = todoViewModel.todoList
+            )
 
             val sortedTodoList = processTodoList(
                 todos = todoViewModel.todoList,
@@ -101,10 +95,10 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 selectedFilter = selectedFilter
             )
             ProgressSummaryCard(
-                completedCount = completedCount,
-                remainingCount = remainingCount,
-                progress = progress,
-                progressPercent = progressPercent
+                completedCount = todoProgress.completedCount,
+                remainingCount = todoProgress.remainingCount,
+                progress = todoProgress.progress,
+                progressPercent = todoProgress.progressPercent
             )
 
             Spacer(modifier = Modifier.height(16.dp))
