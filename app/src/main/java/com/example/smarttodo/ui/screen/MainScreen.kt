@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.example.smarttodo.data.model.Todo
 import com.example.smarttodo.ui.components.TodoItem
 import com.example.smarttodo.ui.components.ProgressSummaryCard
+import com.example.smarttodo.ui.components.TodoSearchField
 import com.example.smarttodo.viewmodel.TodoViewModel
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -157,33 +158,15 @@ fun MainScreen(todoViewModel: TodoViewModel) {
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = searchText,
-                onValueChange = {
+
+            TodoSearchField(
+                searchText = searchText,
+                onSearchTextChange = {
                     searchText = it
                 },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text("할 일 검색")
-                },
-                leadingIcon = {
-                    Text(
-                        text = "🔍",
-                        fontSize = 18.sp
-                    )
-                },
-                trailingIcon = {
-                    if (searchText.isNotEmpty()) {
-                        TextButton(
-                            onClick = {
-                                searchText = ""
-                            }
-                        ) {
-                            Text("✕")
-                        }
-                    }
-                },
-                singleLine = true
+                onClearClick = {
+                    searchText = ""
+                }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
