@@ -26,6 +26,7 @@ import com.example.smarttodo.data.model.Todo
 import com.example.smarttodo.ui.components.AddTodoDialog
 import com.example.smarttodo.ui.components.DeleteTodoDialog
 import com.example.smarttodo.ui.components.EditTodoDialog
+import com.example.smarttodo.ui.components.EmptyTodoMessage
 import com.example.smarttodo.ui.components.ProgressSummaryCard
 import com.example.smarttodo.ui.components.TodoFilterSection
 import com.example.smarttodo.ui.components.TodoItem
@@ -151,26 +152,11 @@ fun MainScreen(todoViewModel: TodoViewModel) {
             Spacer(modifier = Modifier.height(12.dp))
 
             if (sortedTodoList.isEmpty()) {
-                Spacer(modifier = Modifier.height(40.dp))
-
-                Text(
-                    text = when (selectedFilter) {
-                        "미완료" -> "남아 있는 할 일이 없습니다."
-                        "완료" -> "완료한 할 일이 없습니다."
-                        else -> "아직 할 일이 없습니다."
-                    },
-                    fontSize = 18.sp
+                EmptyTodoMessage(
+                    selectedFilter = selectedFilter,
+                    searchText = searchText
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if (selectedFilter == "전체" && searchText.isBlank()) {
-                    Text(
-                        text = "+ 버튼을 눌러 새 할 일을 추가하세요.",
-                        fontSize = 14.sp
-                    )
-                }
-            } else {
+            }  else {
                 LazyColumn {
                     items(
                         items = sortedTodoList,
