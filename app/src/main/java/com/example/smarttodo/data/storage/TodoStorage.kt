@@ -19,6 +19,7 @@ class TodoStorage(private val context: Context) {
             jsonObject.put("isCompleted", todo.isCompleted)
             jsonArray.put(jsonObject)
             jsonObject.put("priority", todo.priority)
+            jsonObject.put("dueDateMillis", todo.dueDateMillis)
         }
 
         prefs.edit()
@@ -39,7 +40,15 @@ class TodoStorage(private val context: Context) {
                     id = jsonObject.getInt("id"),
                     title = jsonObject.getString("title"),
                     isCompleted = jsonObject.getBoolean("isCompleted"),
-                    priority = jsonObject.optInt("priority", 2)
+                    priority = jsonObject.optInt("priority", 2),
+                    dueDateMillis = if (
+                        jsonObject.has("dueDateMillis") &&
+                        !jsonObject.isNull("dueDateMillis")
+                    ) {
+                        jsonObject.getLong("dueDateMillis")
+                    } else {
+                        null
+                    }
                 )
             )
         }

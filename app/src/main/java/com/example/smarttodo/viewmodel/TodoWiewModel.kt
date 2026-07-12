@@ -29,14 +29,19 @@ class TodoViewModel(
         }
     }
 
-    fun addTodo(title: String, priority: Int = 2) {
+    fun addTodo(
+        title: String,
+        priority: Int = 2,
+        dueDateMillis: Long? = null
+    ) {
         if (title.isBlank()) return
 
         todoList.add(
             Todo(
                 id = nextId,
                 title = title,
-                priority = priority
+                priority = priority,
+                dueDateMillis = dueDateMillis
             )
         )
         nextId++
@@ -57,7 +62,8 @@ class TodoViewModel(
     fun updateTodo(
         todo: Todo,
         newTitle: String,
-        newPriority: Int
+        newPriority: Int,
+        newDueDateMillis: Long? = todo.dueDateMillis
     ) {
         if (newTitle.isBlank()) return
 
@@ -66,12 +72,14 @@ class TodoViewModel(
         if (index != -1) {
             todoList[index] = todo.copy(
                 title = newTitle,
-                priority = newPriority
+                priority = newPriority,
+                dueDateMillis = newDueDateMillis
             )
 
             saveTodos()
         }
     }
+
 
     private fun saveTodos() {
         todoStorage.saveTodos(todoList)
