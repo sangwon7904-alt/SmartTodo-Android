@@ -22,16 +22,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarttodo.data.model.Todo
 import com.example.smarttodo.ui.components.TodoItem
+import com.example.smarttodo.ui.components.ProgressSummaryCard
 import com.example.smarttodo.viewmodel.TodoViewModel
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.RadioButton
 import androidx.compose.ui.Alignment
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -41,6 +37,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.rememberDatePickerState
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 
 
 @Composable
@@ -53,6 +57,20 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var editText by remember { mutableStateOf("") }
     var editPriority by remember { mutableStateOf(2) }
     var selectedPriority by remember { mutableStateOf(2) }
+    var selectedDueDateMillis by remember {
+        mutableStateOf<Long?>(null)
+    }
+
+    var showDatePicker by remember {
+        mutableStateOf(false)
+    }
+    val selectedDueDateText =
+        selectedDueDateMillis?.let { millis ->
+            SimpleDateFormat(
+                "yyyy년 M월 d일",
+                Locale.KOREAN
+            ).format(Date(millis))
+        } ?: "마감일 없음"
     var selectedFilter by remember { mutableStateOf("전체") }
     val filterOptions = listOf("전체", "미완료", "완료")
     val snackbarHostState = remember { SnackbarHostState() }
@@ -133,52 +151,14 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                     it.id
                 }
             )
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "오늘의 진행 상황",
-                        fontSize = 18.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "${completedCount}개 완료 · ${remainingCount}개 남음",
-                            fontSize = 14.sp
-                        )
-
-                        Text(
-                            text = "${progressPercent}%",
-                            fontSize = 16.sp
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
+            ProgressSummaryCard(
+                completedCount = completedCount,
+                remainingCount = remainingCount,
+                progress = progress,
+                progressPercent = progressPercent
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
-
             OutlinedTextField(
                 value = searchText,
                 onValueChange = {
@@ -281,6 +261,8 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 onDismissRequest = {
                     showAddDialog = false
                     todoText = ""
+                    selectedPriority = 2
+                    selectedDueDateMillis = null
                 },
                 title = {
                     Text("새 할 일 추가")
@@ -326,6 +308,33 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                                 selectedPriority = 1
                             }
                         )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "마감일",
+                            fontSize = 16.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Button(
+                            onClick = {
+                                showDatePicker = true
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(selectedDueDateText)
+                        }
+
+                        if (selectedDueDateMillis != null) {
+                            TextButton(
+                                onClick = {
+                                    selectedDueDateMillis = null
+                                }
+                            ) {
+                                Text("마감일 삭제")
+                            }
+                        }
                     }
                 },
                 confirmButton = {
@@ -333,10 +342,12 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                         onClick = {
                             todoViewModel.addTodo(
                                 title = todoText,
-                                priority = selectedPriority
+                                priority = selectedPriority,
+                                dueDateMillis = selectedDueDateMillis
                             )
                             todoText = ""
                             selectedPriority = 2
+                            selectedDueDateMillis = null
                             showAddDialog = false
                         }
                     ) {
@@ -347,6 +358,8 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                     TextButton(
                         onClick = {
                             todoText = ""
+                            selectedPriority = 2
+                            selectedDueDateMillis = null
                             showAddDialog = false
                         }
                     ) {
@@ -355,7 +368,42 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 }
             )
         }
+        if (showDatePicker) {
+            val datePickerState = rememberDatePickerState(
+                initialSelectedDateMillis = selectedDueDateMillis
+            )
 
+            DatePickerDialog(
+                onDismissRequest = {
+                    showDatePicker = false
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            selectedDueDateMillis =
+                                datePickerState.selectedDateMillis
+
+                            showDatePicker = false
+                        }
+                    ) {
+                        Text("확인")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDatePicker = false
+                        }
+                    ) {
+                        Text("취소")
+                    }
+                }
+            ) {
+                DatePicker(
+                    state = datePickerState
+                )
+            }
+        }
         if (todoToDelete != null) {
             AlertDialog(
                 onDismissRequest = {
