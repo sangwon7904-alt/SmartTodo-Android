@@ -24,6 +24,7 @@ import com.example.smarttodo.data.model.Todo
 import com.example.smarttodo.ui.components.TodoItem
 import com.example.smarttodo.ui.components.ProgressSummaryCard
 import com.example.smarttodo.ui.components.TodoSearchField
+import com.example.smarttodo.ui.components.TodoFilterSection
 import com.example.smarttodo.viewmodel.TodoViewModel
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -170,24 +171,13 @@ fun MainScreen(todoViewModel: TodoViewModel) {
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                filterOptions.forEachIndexed { index, option ->
-                    SegmentedButton(
-                        selected = selectedFilter == option,
-                        onClick = {
-                            selectedFilter = option
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = filterOptions.size
-                        )
-                    ) {
-                        Text(option)
-                    }
+            TodoFilterSection(
+                selectedFilter = selectedFilter,
+                filterOptions = filterOptions,
+                onFilterSelected = {
+                    selectedFilter = it
                 }
-            }
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
