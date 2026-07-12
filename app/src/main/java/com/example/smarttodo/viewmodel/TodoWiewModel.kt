@@ -47,6 +47,12 @@ class TodoViewModel(
         todoList.remove(todo)
         saveTodos()
     }
+    fun restoreTodo(todo: Todo) {
+        if (todoList.none { it.id == todo.id }) {
+            todoList.add(todo)
+            saveTodos()
+        }
+    }
 
     fun updateTodo(
         todo: Todo,

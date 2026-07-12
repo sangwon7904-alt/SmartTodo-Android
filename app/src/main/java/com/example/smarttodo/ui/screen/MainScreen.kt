@@ -36,6 +36,11 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -50,9 +55,14 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var selectedPriority by remember { mutableStateOf(2) }
     var selectedFilter by remember { mutableStateOf("전체") }
     val filterOptions = listOf("전체", "미완료", "완료")
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
@@ -360,11 +370,24 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            todoToDelete?.let { todo ->
-                                todoViewModel.deleteTodo(todo)
-                            }
+                            val deletedTodo = todoToDelete
 
-                            todoToDelete = null
+                            if (deletedTodo != null) {
+                                todoViewModel.deleteTodo(deletedTodo)
+                                todoToDelete = null
+
+                                coroutineScope.launch {
+                                    val result = snackbarHostState.showSnackbar(
+                                        message = "할 일을 삭제했습니다.",
+                                        actionLabel = "실행 취소",
+                                        withDismissAction = true
+                                    )
+
+                                    if (result == SnackbarResult.ActionPerformed) {
+                                        todoViewModel.restoreTodo(deletedTodo)
+                                    }
+                                }
+                            }
                         }
                     ) {
                         Text("삭제")
