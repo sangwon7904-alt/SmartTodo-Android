@@ -8,38 +8,32 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarttodo.data.model.Todo
-import com.example.smarttodo.ui.components.TodoItem
-import com.example.smarttodo.ui.components.ProgressSummaryCard
-import com.example.smarttodo.ui.components.TodoSearchField
-import com.example.smarttodo.ui.components.TodoFilterSection
-import com.example.smarttodo.viewmodel.TodoViewModel
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.RadioButton
-import androidx.compose.ui.Alignment
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import com.example.smarttodo.ui.components.AddTodoDialog
+import com.example.smarttodo.ui.components.EditTodoDialog
+import com.example.smarttodo.ui.components.ProgressSummaryCard
+import com.example.smarttodo.ui.components.TodoFilterSection
+import com.example.smarttodo.ui.components.TodoItem
+import com.example.smarttodo.ui.components.TodoSearchField
+import com.example.smarttodo.viewmodel.TodoViewModel
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
@@ -47,8 +41,6 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var todoToDelete by remember { mutableStateOf<Todo?>(null) }
     var searchText by remember { mutableStateOf("") }
     var todoToEdit by remember { mutableStateOf<Todo?>(null) }
-    var editText by remember { mutableStateOf("") }
-    var editPriority by remember { mutableStateOf(2) }
     var selectedFilter by remember { mutableStateOf("전체") }
     val filterOptions = listOf("전체", "미완료", "완료")
     val snackbarHostState = remember { SnackbarHostState() }
@@ -192,8 +184,6 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                             },
                             onClick = {
                                 todoToEdit = todo
-                                editText = todo.title
-                                editPriority = todo.priority
                             },
                             onLongClick = {
                                 todoToDelete = todo
@@ -268,106 +258,22 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 }
             )
         }
-        if (todoToEdit != null) {
-            AlertDialog(
-                onDismissRequest = {
+        todoToEdit?.let { todo ->
+            EditTodoDialog(
+                todo = todo,
+                onDismiss = {
                     todoToEdit = null
-                    editText = ""
-                    editPriority = 2
                 },
-                title = {
-                    Text("할 일 수정")
-                },
-                text = {
-                    Column {
-                        OutlinedTextField(
-                            value = editText,
-                            onValueChange = {
-                                editText = it
-                            },
-                            label = {
-                                Text("수정할 내용")
-                            },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                onConfirm = { newTitle, newPriority ->
+                    todoViewModel.updateTodo(
+                        todo = todo,
+                        newTitle = newTitle,
+                        newPriority = newPriority
+                    )
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text("우선순위")
-
-                        PriorityOption(
-                            text = "높음",
-                            selected = editPriority == 3,
-                            onClick = {
-                                editPriority = 3
-                            }
-                        )
-
-                        PriorityOption(
-                            text = "보통",
-                            selected = editPriority == 2,
-                            onClick = {
-                                editPriority = 2
-                            }
-                        )
-
-                        PriorityOption(
-                            text = "낮음",
-                            selected = editPriority == 1,
-                            onClick = {
-                                editPriority = 1
-                            }
-                        )
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            todoToEdit?.let {
-                                todoViewModel.updateTodo(
-                                    todo = it,
-                                    newTitle = editText,
-                                    newPriority = editPriority
-                                )
-                            }
-                            todoToEdit = null
-                            editText = ""
-                        }
-                    ) {
-                        Text("저장")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            todoToEdit = null
-                            editText = ""
-                            editPriority = 2
-                        }
-                    ) {
-                        Text("취소")
-                    }
+                    todoToEdit = null
                 }
             )
         }
-    }
-}
-@Composable
-private fun PriorityOption(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(
-            selected = selected,
-            onClick = onClick
-        )
-
-        Text(text = text)
     }
 }
