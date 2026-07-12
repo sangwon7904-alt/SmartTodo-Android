@@ -5,8 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -26,12 +25,11 @@ import com.example.smarttodo.data.model.Todo
 import com.example.smarttodo.ui.components.AddTodoDialog
 import com.example.smarttodo.ui.components.DeleteTodoDialog
 import com.example.smarttodo.ui.components.EditTodoDialog
-import com.example.smarttodo.ui.components.EmptyTodoMessage
 import com.example.smarttodo.ui.components.ProgressSummaryCard
 import com.example.smarttodo.ui.components.TodoFilterSection
-import com.example.smarttodo.ui.components.TodoItem
 import com.example.smarttodo.ui.components.TodoSearchField
 import com.example.smarttodo.viewmodel.TodoViewModel
+import com.example.smarttodo.ui.components.TodoListSection
 import kotlinx.coroutines.launch
 
 
@@ -151,33 +149,20 @@ fun MainScreen(todoViewModel: TodoViewModel) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (sortedTodoList.isEmpty()) {
-                EmptyTodoMessage(
-                    selectedFilter = selectedFilter,
-                    searchText = searchText
-                )
-            }  else {
-                LazyColumn {
-                    items(
-                        items = sortedTodoList,
-                        key = { todo -> todo.id }
-                    ) { todo ->
-                        TodoItem(
-                            todo = todo,
-                            onCheckedChange = {
-                                todoViewModel.toggleTodo(todo)
-                            },
-                            onClick = {
-                                todoToEdit = todo
-                            },
-                            onLongClick = {
-                                todoToDelete = todo
-                            },
-                            modifier = Modifier.animateItem()
-                        )
-                    }
+            TodoListSection(
+                todos = sortedTodoList,
+                selectedFilter = selectedFilter,
+                searchText = searchText,
+                onCheckedChange = { todo ->
+                    todoViewModel.toggleTodo(todo)
+                },
+                onTodoClick = { todo ->
+                    todoToEdit = todo
+                },
+                onTodoLongClick = { todo ->
+                    todoToDelete = todo
                 }
-            }
+            )
         }
         if (showAddDialog) {
             AddTodoDialog(
