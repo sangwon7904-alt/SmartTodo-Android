@@ -39,38 +39,16 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
-import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.rememberDatePickerState
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.example.smarttodo.ui.components.AddTodoDialog
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
     var showAddDialog by remember { mutableStateOf(false) }
-    var todoText by remember { mutableStateOf("") }
     var todoToDelete by remember { mutableStateOf<Todo?>(null) }
     var searchText by remember { mutableStateOf("") }
     var todoToEdit by remember { mutableStateOf<Todo?>(null) }
     var editText by remember { mutableStateOf("") }
     var editPriority by remember { mutableStateOf(2) }
-    var selectedPriority by remember { mutableStateOf(2) }
-    var selectedDueDateMillis by remember {
-        mutableStateOf<Long?>(null)
-    }
-
-    var showDatePicker by remember {
-        mutableStateOf(false)
-    }
-    val selectedDueDateText =
-        selectedDueDateMillis?.let { millis ->
-            SimpleDateFormat(
-                "yyyy년 M월 d일",
-                Locale.KOREAN
-            ).format(Date(millis))
-        } ?: "마감일 없음"
     var selectedFilter by remember { mutableStateOf("전체") }
     val filterOptions = listOf("전체", "미완료", "완료")
     val snackbarHostState = remember { SnackbarHostState() }
@@ -226,154 +204,21 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 }
             }
         }
-
         if (showAddDialog) {
-            AlertDialog(
-                onDismissRequest = {
+            AddTodoDialog(
+                onDismiss = {
                     showAddDialog = false
-                    todoText = ""
-                    selectedPriority = 2
-                    selectedDueDateMillis = null
                 },
-                title = {
-                    Text("새 할 일 추가")
-                },
-                text = {
-                    Column {
-                        OutlinedTextField(
-                            value = todoText,
-                            onValueChange = {
-                                todoText = it
-                            },
-                            label = {
-                                Text("할 일을 입력하세요")
-                            },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                onConfirm = { title, priority, dueDateMillis ->
+                    todoViewModel.addTodo(
+                        title = title,
+                        priority = priority,
+                        dueDateMillis = dueDateMillis
+                    )
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text("우선순위")
-
-                        PriorityOption(
-                            text = "높음",
-                            selected = selectedPriority == 3,
-                            onClick = {
-                                selectedPriority = 3
-                            }
-                        )
-
-                        PriorityOption(
-                            text = "보통",
-                            selected = selectedPriority == 2,
-                            onClick = {
-                                selectedPriority = 2
-                            }
-                        )
-
-                        PriorityOption(
-                            text = "낮음",
-                            selected = selectedPriority == 1,
-                            onClick = {
-                                selectedPriority = 1
-                            }
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = "마감일",
-                            fontSize = 16.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Button(
-                            onClick = {
-                                showDatePicker = true
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(selectedDueDateText)
-                        }
-
-                        if (selectedDueDateMillis != null) {
-                            TextButton(
-                                onClick = {
-                                    selectedDueDateMillis = null
-                                }
-                            ) {
-                                Text("마감일 삭제")
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            todoViewModel.addTodo(
-                                title = todoText,
-                                priority = selectedPriority,
-                                dueDateMillis = selectedDueDateMillis
-                            )
-                            todoText = ""
-                            selectedPriority = 2
-                            selectedDueDateMillis = null
-                            showAddDialog = false
-                        }
-                    ) {
-                        Text("저장")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            todoText = ""
-                            selectedPriority = 2
-                            selectedDueDateMillis = null
-                            showAddDialog = false
-                        }
-                    ) {
-                        Text("취소")
-                    }
+                    showAddDialog = false
                 }
             )
-        }
-        if (showDatePicker) {
-            val datePickerState = rememberDatePickerState(
-                initialSelectedDateMillis = selectedDueDateMillis
-            )
-
-            DatePickerDialog(
-                onDismissRequest = {
-                    showDatePicker = false
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            selectedDueDateMillis =
-                                datePickerState.selectedDateMillis
-
-                            showDatePicker = false
-                        }
-                    ) {
-                        Text("확인")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            showDatePicker = false
-                        }
-                    ) {
-                        Text("취소")
-                    }
-                }
-            ) {
-                DatePicker(
-                    state = datePickerState
-                )
-            }
         }
         if (todoToDelete != null) {
             AlertDialog(
