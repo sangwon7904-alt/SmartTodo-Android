@@ -45,8 +45,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
-
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
     var showAddDialog by remember { mutableStateOf(false) }
