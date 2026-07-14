@@ -32,7 +32,9 @@ class TodoViewModel(
     fun addTodo(
         title: String,
         priority: Int = 2,
-        dueDateMillis: Long? = null
+        dueDateMillis: Long? = null,
+        dueHour: Int? = null,
+        dueMinute: Int? = null
     ) {
         if (title.isBlank()) return
 
@@ -41,7 +43,9 @@ class TodoViewModel(
                 id = nextId,
                 title = title,
                 priority = priority,
-                dueDateMillis = dueDateMillis
+                dueDateMillis = dueDateMillis,
+                dueHour = dueHour,
+                dueMinute = dueMinute
             )
         )
         nextId++
@@ -63,7 +67,10 @@ class TodoViewModel(
         todo: Todo,
         newTitle: String,
         newPriority: Int,
-        newDueDateMillis: Long? = todo.dueDateMillis
+        newDueDateMillis: Long? = todo.dueDateMillis,
+        newDueHour: Int? = todo.dueHour,
+        newDueMinute: Int? = todo.dueMinute
+
     ) {
         if (newTitle.isBlank()) return
 
@@ -73,7 +80,10 @@ class TodoViewModel(
             todoList[index] = todo.copy(
                 title = newTitle,
                 priority = newPriority,
-                dueDateMillis = newDueDateMillis
+                dueDateMillis = newDueDateMillis,
+                dueHour = newDueHour,
+                dueMinute = newDueMinute
+
             )
 
             saveTodos()

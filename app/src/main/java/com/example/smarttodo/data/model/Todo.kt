@@ -5,5 +5,7 @@ data class Todo(
     val title: String,
     val isCompleted: Boolean = false,
     val priority: Int = 2,
-    val dueDateMillis: Long? = null
+    val dueDateMillis: Long? = null,
+    val dueHour: Int? = null,
+    val dueMinute: Int? = null
 )
