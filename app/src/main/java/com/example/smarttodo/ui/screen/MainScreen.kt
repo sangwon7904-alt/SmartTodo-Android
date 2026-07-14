@@ -187,23 +187,34 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 }
             )
         }
+
         todoToEdit?.let { todo ->
             EditTodoDialog(
                 todo = todo,
                 onDismiss = {
                     todoToEdit = null
                 },
-                onConfirm = { newTitle, newPriority, newDueDateMillis ->
+                onConfirm = {
+                        newTitle,
+                        newPriority,
+                        newDueDateMillis,
+                        newDueHour,
+                        newDueMinute ->
+
                     todoViewModel.updateTodo(
                         todo = todo,
                         newTitle = newTitle,
                         newPriority = newPriority,
-                        newDueDateMillis = newDueDateMillis
+                        newDueDateMillis = newDueDateMillis,
+                        newDueHour = newDueHour,
+                        newDueMinute = newDueMinute
                     )
 
                     todoToEdit = null
                 }
             )
         }
+
+
     }
 }

@@ -9,11 +9,14 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -26,9 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarttodo.data.model.Todo
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTodoDialog(
     todo: Todo,
@@ -36,7 +41,9 @@ fun EditTodoDialog(
     onConfirm: (
         title: String,
         priority: Int,
-        dueDateMillis: Long?
+        dueDateMillis: Long?,
+        dueHour: Int?,
+        dueMinute: Int?
     ) -> Unit
 ) {
     var editText by remember(todo.id) {
@@ -51,16 +58,41 @@ fun EditTodoDialog(
         mutableStateOf(todo.dueDateMillis)
     }
 
+    var editDueHour by remember(todo.id) {
+        mutableStateOf(todo.dueHour)
+    }
+
+    var editDueMinute by remember(todo.id) {
+        mutableStateOf(todo.dueMinute)
+    }
+
     var showDatePicker by remember {
         mutableStateOf(false)
     }
 
-    val dueDateText = editDueDateMillis?.let { millis ->
-        SimpleDateFormat(
-            "yyyy년 M월 d일",
-            Locale.KOREAN
-        ).format(Date(millis))
-    } ?: "마감일 없음"
+    var showTimePicker by remember {
+        mutableStateOf(false)
+    }
+
+    val dueDateText =
+        editDueDateMillis?.let { millis ->
+            SimpleDateFormat(
+                "yyyy년 M월 d일",
+                Locale.KOREAN
+            ).format(Date(millis))
+        } ?: "마감일 없음"
+
+    val dueTimeText =
+        if (editDueHour != null && editDueMinute != null) {
+            String.format(
+                Locale.KOREAN,
+                "%02d:%02d",
+                editDueHour,
+                editDueMinute
+            )
+        } else {
+            "마감 시간 없음"
+        }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -128,9 +160,36 @@ fun EditTodoDialog(
                 }
 
                 if (editDueDateMillis != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            showTimePicker = true
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(dueTimeText)
+                    }
+
+                    if (
+                        editDueHour != null &&
+                        editDueMinute != null
+                    ) {
+                        TextButton(
+                            onClick = {
+                                editDueHour = null
+                                editDueMinute = null
+                            }
+                        ) {
+                            Text("마감 시간 삭제")
+                        }
+                    }
+
                     TextButton(
                         onClick = {
                             editDueDateMillis = null
+                            editDueHour = null
+                            editDueMinute = null
                         }
                     ) {
                         Text("마감일 삭제")
@@ -145,7 +204,9 @@ fun EditTodoDialog(
                         onConfirm(
                             editText,
                             editPriority,
-                            editDueDateMillis
+                            editDueDateMillis,
+                            editDueHour,
+                            editDueMinute
                         )
                     }
                 }
@@ -197,6 +258,52 @@ fun EditTodoDialog(
                 state = datePickerState
             )
         }
+    }
+
+    if (showTimePicker) {
+        val currentTime = Calendar.getInstance()
+
+        val timePickerState = rememberTimePickerState(
+            initialHour = editDueHour
+                ?: currentTime.get(Calendar.HOUR_OF_DAY),
+            initialMinute = editDueMinute
+                ?: currentTime.get(Calendar.MINUTE),
+            is24Hour = true
+        )
+
+        AlertDialog(
+            onDismissRequest = {
+                showTimePicker = false
+            },
+            title = {
+                Text("마감 시간 선택")
+            },
+            text = {
+                TimePicker(
+                    state = timePickerState
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        editDueHour = timePickerState.hour
+                        editDueMinute = timePickerState.minute
+                        showTimePicker = false
+                    }
+                ) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showTimePicker = false
+                    }
+                ) {
+                    Text("취소")
+                }
+            }
+        )
     }
 }
 
