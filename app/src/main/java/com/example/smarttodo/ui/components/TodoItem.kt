@@ -33,7 +33,9 @@ fun TodoItem(
     modifier: Modifier = Modifier
 ) {
     val dueDateDisplay = formatDueDate(
-        dueDateMillis = todo.dueDateMillis
+        dueDateMillis = todo.dueDateMillis,
+        dueHour = todo.dueHour,
+        dueMinute = todo.dueMinute
     )
     Card(
         modifier = modifier

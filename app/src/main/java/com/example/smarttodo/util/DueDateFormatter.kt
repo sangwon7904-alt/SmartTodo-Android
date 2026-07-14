@@ -14,6 +14,8 @@ data class DueDateDisplay(
 
 fun formatDueDate(
     dueDateMillis: Long?,
+    dueHour: Int?,
+    dueMinute: Int?,
     today: LocalDate = LocalDate.now()
 ): DueDateDisplay? {
     if (dueDateMillis == null) {
@@ -25,12 +27,24 @@ fun formatDueDate(
         .atZone(ZoneId.systemDefault())
         .toLocalDate()
 
+    val dueTimeText =
+        if (dueHour != null && dueMinute != null) {
+            String.format(
+                Locale.KOREAN,
+                "%02d:%02d",
+                dueHour,
+                dueMinute
+            )
+        } else {
+            null
+        }
+
     val daysDifference = ChronoUnit.DAYS.between(
         today,
         dueDate
     )
 
-    val displayText = when {
+    val dateText = when {
         daysDifference < 0 -> {
             "기한 지남 · ${
                 dueDate.format(
@@ -54,6 +68,12 @@ fun formatDueDate(
                 )
             )
         }
+    }
+
+    val displayText = if (dueTimeText != null) {
+        "$dateText · $dueTimeText"
+    } else {
+        dateText
     }
 
     return DueDateDisplay(
