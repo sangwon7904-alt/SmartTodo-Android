@@ -40,7 +40,7 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     var searchText by remember { mutableStateOf("") }
     var todoToEdit by remember { mutableStateOf<Todo?>(null) }
     var selectedFilter by remember { mutableStateOf("전체") }
-    val filterOptions = listOf("전체", "미완료", "완료")
+    val filterOptions = listOf("전체", "오늘", "미완료", "완료")
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 

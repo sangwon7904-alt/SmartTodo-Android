@@ -23,6 +23,7 @@ fun EmptyTodoMessage(
         Text(
             text = when {
                 searchText.isNotBlank() -> "검색 결과가 없습니다."
+                selectedFilter == "오늘" -> "오늘 마감할 일이 없습니다."
                 selectedFilter == "미완료" -> "남아 있는 할 일이 없습니다."
                 selectedFilter == "완료" -> "완료한 할 일이 없습니다."
                 else -> "아직 할 일이 없습니다."

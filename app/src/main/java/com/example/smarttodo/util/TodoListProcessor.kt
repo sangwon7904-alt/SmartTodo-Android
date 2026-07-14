@@ -21,6 +21,14 @@ fun processTodoList(
             )
 
             val matchesFilter = when (selectedFilter) {
+                "오늘" -> {
+                    isDueTodayOrOverdue(
+                        todo = todo,
+                        today = today,
+                        zoneId = zoneId
+                    )
+                }
+
                 "미완료" -> !todo.isCompleted
                 "완료" -> todo.isCompleted
                 else -> true
@@ -30,26 +38,40 @@ fun processTodoList(
         }
         .sortedWith(
             compareBy<Todo> {
-                // 미완료 항목을 완료 항목보다 위에 표시
                 if (it.isCompleted) 1 else 0
             }.thenBy {
-                // 미완료 항목 안에서 마감일 순서 계산
                 dueDateSortGroup(
                     todo = it,
                     today = today,
                     zoneId = zoneId
                 )
             }.thenBy {
-                // 실제 마감일이 빠른 항목부터 표시
                 it.dueDateMillis ?: Long.MAX_VALUE
             }.thenByDescending {
-                // 마감일 조건이 같으면 높은 우선순위부터 표시
                 it.priority
             }.thenByDescending {
-                // 나머지 조건도 같으면 최근 추가 항목부터 표시
                 it.id
             }
         )
+}
+
+private fun isDueTodayOrOverdue(
+    todo: Todo,
+    today: LocalDate,
+    zoneId: ZoneId
+): Boolean {
+    if (todo.isCompleted) {
+        return false
+    }
+
+    val dueDateMillis = todo.dueDateMillis ?: return false
+
+    val dueDate = Instant
+        .ofEpochMilli(dueDateMillis)
+        .atZone(zoneId)
+        .toLocalDate()
+
+    return !dueDate.isAfter(today)
 }
 
 private fun dueDateSortGroup(
