@@ -6,10 +6,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -19,7 +23,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.smarttodo.data.model.Todo
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun EditTodoDialog(
@@ -27,7 +35,8 @@ fun EditTodoDialog(
     onDismiss: () -> Unit,
     onConfirm: (
         title: String,
-        priority: Int
+        priority: Int,
+        dueDateMillis: Long?
     ) -> Unit
 ) {
     var editText by remember(todo.id) {
@@ -37,6 +46,21 @@ fun EditTodoDialog(
     var editPriority by remember(todo.id) {
         mutableIntStateOf(todo.priority)
     }
+
+    var editDueDateMillis by remember(todo.id) {
+        mutableStateOf(todo.dueDateMillis)
+    }
+
+    var showDatePicker by remember {
+        mutableStateOf(false)
+    }
+
+    val dueDateText = editDueDateMillis?.let { millis ->
+        SimpleDateFormat(
+            "yyyy년 M월 d일",
+            Locale.KOREAN
+        ).format(Date(millis))
+    } ?: "마감일 없음"
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -84,6 +108,34 @@ fun EditTodoDialog(
                         editPriority = 1
                     }
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "마감일",
+                    fontSize = 16.sp
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        showDatePicker = true
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(dueDateText)
+                }
+
+                if (editDueDateMillis != null) {
+                    TextButton(
+                        onClick = {
+                            editDueDateMillis = null
+                        }
+                    ) {
+                        Text("마감일 삭제")
+                    }
+                }
             }
         },
         confirmButton = {
@@ -92,7 +144,8 @@ fun EditTodoDialog(
                     if (editText.isNotBlank()) {
                         onConfirm(
                             editText,
-                            editPriority
+                            editPriority,
+                            editDueDateMillis
                         )
                     }
                 }
@@ -108,6 +161,43 @@ fun EditTodoDialog(
             }
         }
     )
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = editDueDateMillis
+        )
+
+        DatePickerDialog(
+            onDismissRequest = {
+                showDatePicker = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        editDueDateMillis =
+                            datePickerState.selectedDateMillis
+
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("취소")
+                }
+            }
+        ) {
+            DatePicker(
+                state = datePickerState
+            )
+        }
+    }
 }
 
 @Composable

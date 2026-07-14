@@ -185,11 +185,12 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 onDismiss = {
                     todoToEdit = null
                 },
-                onConfirm = { newTitle, newPriority ->
+                onConfirm = { newTitle, newPriority, newDueDateMillis ->
                     todoViewModel.updateTodo(
                         todo = todo,
                         newTitle = newTitle,
-                        newPriority = newPriority
+                        newPriority = newPriority,
+                        newDueDateMillis = newDueDateMillis
                     )
 
                     todoToEdit = null
