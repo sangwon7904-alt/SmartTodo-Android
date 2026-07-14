@@ -2,9 +2,11 @@ package com.example.smarttodo.viewmodel
 
 import com.example.smarttodo.data.model.Todo
 import com.example.smarttodo.data.storage.TodoStorage
+import com.example.smarttodo.notification.TodoReminderScheduler
 
 class TodoViewModel(
-    private val todoStorage: TodoStorage
+    private val todoStorage: TodoStorage,
+    private val reminderScheduler: TodoReminderScheduler
 ) {
     private var nextId = 1
 
@@ -22,10 +24,19 @@ class TodoViewModel(
     }
 
     fun toggleTodo(todo: Todo) {
-        val index = todoList.indexOfFirst { it.id == todo.id }
+        val index = todoList.indexOfFirst {
+            it.id == todo.id
+        }
+
         if (index != -1) {
-            todoList[index] = todo.copy(isCompleted = !todo.isCompleted)
+            val updatedTodo = todo.copy(
+                isCompleted = !todo.isCompleted
+            )
+
+            todoList[index] = updatedTodo
+
             saveTodos()
+            updateReminder(updatedTodo)
         }
     }
 
@@ -37,29 +48,34 @@ class TodoViewModel(
         dueMinute: Int? = null
     ) {
         if (title.isBlank()) return
-
-        todoList.add(
-            Todo(
-                id = nextId,
-                title = title,
-                priority = priority,
-                dueDateMillis = dueDateMillis,
-                dueHour = dueHour,
-                dueMinute = dueMinute
-            )
+        val newTodo = Todo(
+            id = nextId,
+            title = title,
+            priority = priority,
+            dueDateMillis = dueDateMillis,
+            dueHour = dueHour,
+            dueMinute = dueMinute
         )
+
+        todoList.add(newTodo)
+
         nextId++
+
         saveTodos()
+        updateReminder(newTodo)
     }
 
     fun deleteTodo(todo: Todo) {
+        reminderScheduler.cancel(todo.id)
         todoList.remove(todo)
         saveTodos()
     }
     fun restoreTodo(todo: Todo) {
         if (todoList.none { it.id == todo.id }) {
             todoList.add(todo)
+
             saveTodos()
+            updateReminder(todo)
         }
     }
 
@@ -77,19 +93,27 @@ class TodoViewModel(
         val index = todoList.indexOfFirst { it.id == todo.id }
 
         if (index != -1) {
-            todoList[index] = todo.copy(
+            val updatedTodo = todo.copy(
                 title = newTitle,
                 priority = newPriority,
                 dueDateMillis = newDueDateMillis,
                 dueHour = newDueHour,
                 dueMinute = newDueMinute
-
             )
 
+            todoList[index] = updatedTodo
+
             saveTodos()
+            updateReminder(updatedTodo)
         }
     }
+    private fun updateReminder(todo: Todo) {
+        reminderScheduler.cancel(todo.id)
 
+        if (!todo.isCompleted) {
+            reminderScheduler.schedule(todo)
+        }
+    }
 
     private fun saveTodos() {
         todoStorage.saveTodos(todoList)

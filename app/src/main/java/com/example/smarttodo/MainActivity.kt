@@ -10,6 +10,7 @@ import com.example.smarttodo.ui.theme.SmartTodoTheme
 import com.example.smarttodo.viewmodel.TodoViewModel
 import com.example.smarttodo.data.storage.TodoStorage
 import com.example.smarttodo.notification.NotificationHelper
+import com.example.smarttodo.notification.TodoReminderScheduler
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -46,8 +47,20 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 }
-                val todoStorage = remember { TodoStorage(this@MainActivity) }
-                val todoViewModel = remember { TodoViewModel(todoStorage) }
+                val todoStorage = remember {
+                    TodoStorage(this@MainActivity)
+                }
+
+                val reminderScheduler = remember {
+                    TodoReminderScheduler(this@MainActivity)
+                }
+
+                val todoViewModel = remember {
+                    TodoViewModel(
+                        todoStorage = todoStorage,
+                        reminderScheduler = reminderScheduler
+                    )
+                }
                 MainScreen(todoViewModel = todoViewModel)
             }
         }
