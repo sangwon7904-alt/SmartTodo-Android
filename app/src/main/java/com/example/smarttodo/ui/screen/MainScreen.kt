@@ -144,11 +144,19 @@ fun MainScreen(todoViewModel: TodoViewModel) {
                 onDismiss = {
                     showAddDialog = false
                 },
-                onConfirm = { title, priority, dueDateMillis ->
+                onConfirm = {
+                        title,
+                        priority,
+                        dueDateMillis,
+                        dueHour,
+                        dueMinute ->
+
                     todoViewModel.addTodo(
                         title = title,
                         priority = priority,
-                        dueDateMillis = dueDateMillis
+                        dueDateMillis = dueDateMillis,
+                        dueHour = dueHour,
+                        dueMinute = dueMinute
                     )
 
                     showAddDialog = false

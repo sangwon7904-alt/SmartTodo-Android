@@ -13,9 +13,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -23,25 +26,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.ExperimentalMaterial3Api
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTodoDialog(
     onDismiss: () -> Unit,
     onConfirm: (
         title: String,
         priority: Int,
-        dueDateMillis: Long?
+        dueDateMillis: Long?,
+        dueHour: Int?,
+        dueMinute: Int?
     ) -> Unit
 ) {
     var todoText by remember { mutableStateOf("") }
-    var selectedPriority by remember { mutableStateOf(2) }
+    var selectedPriority by remember { mutableIntStateOf(2) }
     var selectedDueDateMillis by remember {
         mutableStateOf<Long?>(null)
     }
+    var selectedDueHour by remember {
+        mutableStateOf<Int?>(null)
+    }
+    var selectedDueMinute by remember {
+        mutableStateOf<Int?>(null)
+    }
+
     var showDatePicker by remember {
+        mutableStateOf(false)
+    }
+    var showTimePicker by remember {
         mutableStateOf(false)
     }
 
@@ -52,6 +70,18 @@ fun AddTodoDialog(
                 Locale.KOREAN
             ).format(Date(millis))
         } ?: "마감일 없음"
+
+    val selectedDueTimeText =
+        if (selectedDueHour != null && selectedDueMinute != null) {
+            String.format(
+                Locale.KOREAN,
+                "%02d:%02d",
+                selectedDueHour,
+                selectedDueMinute
+            )
+        } else {
+            "마감 시간 없음"
+        }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -119,9 +149,36 @@ fun AddTodoDialog(
                 }
 
                 if (selectedDueDateMillis != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            showTimePicker = true
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(selectedDueTimeText)
+                    }
+
+                    if (
+                        selectedDueHour != null &&
+                        selectedDueMinute != null
+                    ) {
+                        TextButton(
+                            onClick = {
+                                selectedDueHour = null
+                                selectedDueMinute = null
+                            }
+                        ) {
+                            Text("마감 시간 삭제")
+                        }
+                    }
+
                     TextButton(
                         onClick = {
                             selectedDueDateMillis = null
+                            selectedDueHour = null
+                            selectedDueMinute = null
                         }
                     ) {
                         Text("마감일 삭제")
@@ -136,7 +193,9 @@ fun AddTodoDialog(
                         onConfirm(
                             todoText,
                             selectedPriority,
-                            selectedDueDateMillis
+                            selectedDueDateMillis,
+                            selectedDueHour,
+                            selectedDueMinute
                         )
                     }
                 }
@@ -188,6 +247,52 @@ fun AddTodoDialog(
                 state = datePickerState
             )
         }
+    }
+
+    if (showTimePicker) {
+        val currentTime = Calendar.getInstance()
+
+        val timePickerState = rememberTimePickerState(
+            initialHour = selectedDueHour
+                ?: currentTime.get(Calendar.HOUR_OF_DAY),
+            initialMinute = selectedDueMinute
+                ?: currentTime.get(Calendar.MINUTE),
+            is24Hour = true
+        )
+
+        AlertDialog(
+            onDismissRequest = {
+                showTimePicker = false
+            },
+            title = {
+                Text("마감 시간 선택")
+            },
+            text = {
+                TimePicker(
+                    state = timePickerState
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        selectedDueHour = timePickerState.hour
+                        selectedDueMinute = timePickerState.minute
+                        showTimePicker = false
+                    }
+                ) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showTimePicker = false
+                    }
+                ) {
+                    Text("취소")
+                }
+            }
+        )
     }
 }
 
