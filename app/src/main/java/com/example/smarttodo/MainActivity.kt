@@ -9,11 +9,13 @@ import com.example.smarttodo.ui.screen.MainScreen
 import com.example.smarttodo.ui.theme.SmartTodoTheme
 import com.example.smarttodo.viewmodel.TodoViewModel
 import com.example.smarttodo.data.storage.TodoStorage
+import com.example.smarttodo.notification.NotificationHelper
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        NotificationHelper.createNotificationChannel(this)
         setContent {
             SmartTodoTheme {
                 val todoStorage = remember { TodoStorage(this@MainActivity) }
