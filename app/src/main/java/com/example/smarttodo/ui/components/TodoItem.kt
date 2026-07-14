@@ -20,9 +20,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarttodo.data.model.Todo
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.example.smarttodo.util.formatDueDate
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -33,13 +32,9 @@ fun TodoItem(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val dueDateText =
-        todo.dueDateMillis?.let { millis ->
-            SimpleDateFormat(
-                "yyyy.MM.dd",
-                Locale.KOREAN
-            ).format(Date(millis))
-        }
+    val dueDateDisplay = formatDueDate(
+        dueDateMillis = todo.dueDateMillis
+    )
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -115,11 +110,18 @@ fun TodoItem(
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (dueDateText != null) {
+                if (dueDateDisplay != null) {
                     Text(
-                        text = "마감일 · $dueDateText",
+                        text = dueDateDisplay.text,
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (
+                            dueDateDisplay.isOverdue &&
+                            !todo.isCompleted
+                        ) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                     )
                 }
             }
