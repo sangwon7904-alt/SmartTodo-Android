@@ -1,5 +1,16 @@
 package com.example.smarttodo
 
+import android.app.AlarmManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,6 +37,9 @@ class MainActivity : ComponentActivity() {
         NotificationHelper.createNotificationChannel(this)
         setContent {
             SmartTodoTheme {
+                var showExactAlarmDialog by remember {
+                    mutableStateOf(false)
+                }
                 val notificationPermissionLauncher =
                     rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestPermission()
@@ -46,6 +60,15 @@ class MainActivity : ComponentActivity() {
                             Manifest.permission.POST_NOTIFICATIONS
                         )
                     }
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val alarmManager =
+                            getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+                        if (!alarmManager.canScheduleExactAlarms()) {
+                            showExactAlarmDialog = true
+                        }
+                    }
                 }
                 val todoStorage = remember {
                     TodoStorage(this@MainActivity)
@@ -62,6 +85,50 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 MainScreen(todoViewModel = todoViewModel)
+                if (showExactAlarmDialog) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            showExactAlarmDialog = false
+                        },
+                        title = {
+                            Text("정확한 알림 설정")
+                        },
+                        text = {
+                            Text(
+                                "SmartTodo가 설정한 시간에 정확히 알림을 보내려면 " +
+                                        "'알람 및 리마인더' 권한이 필요합니다."
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    showExactAlarmDialog = false
+
+                                    val intent = Intent(
+                                        Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                                    ).apply {
+                                        data = Uri.parse(
+                                            "package:$packageName"
+                                        )
+                                    }
+
+                                    startActivity(intent)
+                                }
+                            ) {
+                                Text("설정 열기")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    showExactAlarmDialog = false
+                                }
+                            ) {
+                                Text("나중에")
+                            }
+                        }
+                    )
+                }
             }
         }
     }
