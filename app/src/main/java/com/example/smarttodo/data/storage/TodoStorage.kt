@@ -22,6 +22,10 @@ class TodoStorage(private val context: Context) {
             jsonObject.put("dueDateMillis", todo.dueDateMillis)
             jsonObject.put("dueHour", todo.dueHour)
             jsonObject.put("dueMinute", todo.dueMinute)
+            jsonObject.put(
+                "snoozedUntilMillis",
+                todo.snoozedUntilMillis
+            )
         }
 
         prefs.edit()
@@ -64,6 +68,15 @@ class TodoStorage(private val context: Context) {
                         !jsonObject.isNull("dueMinute")
                     ) {
                         jsonObject.getInt("dueMinute")
+                    } else {
+                        null
+                    },
+
+                    snoozedUntilMillis = if (
+                        jsonObject.has("snoozedUntilMillis") &&
+                        !jsonObject.isNull("snoozedUntilMillis")
+                    ) {
+                        jsonObject.getLong("snoozedUntilMillis")
                     } else {
                         null
                     }

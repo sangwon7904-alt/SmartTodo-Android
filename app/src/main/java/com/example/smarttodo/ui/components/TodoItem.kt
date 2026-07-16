@@ -21,6 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarttodo.data.model.Todo
 import com.example.smarttodo.util.formatDueDate
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -37,6 +41,26 @@ fun TodoItem(
         dueHour = todo.dueHour,
         dueMinute = todo.dueMinute
     )
+    val snoozeText =
+        todo.snoozedUntilMillis
+            ?.takeIf {
+                it > System.currentTimeMillis()
+            }
+            ?.let { millis ->
+                val snoozeTime = Instant
+                    .ofEpochMilli(millis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalTime()
+
+                val formattedTime = snoozeTime.format(
+                    DateTimeFormatter.ofPattern(
+                        "HH:mm",
+                        Locale.KOREAN
+                    )
+                )
+
+                "⏰ ${formattedTime}에 다시 알림"
+            }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -124,6 +148,13 @@ fun TodoItem(
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         }
+                    )
+                }
+                if (snoozeText != null && !todo.isCompleted) {
+                    Text(
+                        text = snoozeText,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }

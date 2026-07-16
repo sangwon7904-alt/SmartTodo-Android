@@ -7,5 +7,6 @@ data class Todo(
     val priority: Int = 2,
     val dueDateMillis: Long? = null,
     val dueHour: Int? = null,
-    val dueMinute: Int? = null
+    val dueMinute: Int? = null,
+    val snoozedUntilMillis: Long? = null
 )

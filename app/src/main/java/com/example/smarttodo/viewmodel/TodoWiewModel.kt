@@ -24,13 +24,20 @@ class TodoViewModel(
     }
 
     fun toggleTodo(todo: Todo) {
+
         val index = todoList.indexOfFirst {
             it.id == todo.id
         }
 
         if (index != -1) {
+
+            val willBeCompleted = !todo.isCompleted
+
             val updatedTodo = todo.copy(
-                isCompleted = !todo.isCompleted
+                isCompleted = willBeCompleted,
+                snoozedUntilMillis =
+                    if (willBeCompleted) null
+                    else todo.snoozedUntilMillis
             )
 
             todoList[index] = updatedTodo
@@ -98,7 +105,8 @@ class TodoViewModel(
                 priority = newPriority,
                 dueDateMillis = newDueDateMillis,
                 dueHour = newDueHour,
-                dueMinute = newDueMinute
+                dueMinute = newDueMinute,
+                snoozedUntilMillis = null
             )
 
             todoList[index] = updatedTodo

@@ -10,6 +10,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.smarttodo.MainActivity
+import com.example.smarttodo.data.storage.TodoStorage
 
 class TodoReminderReceiver : BroadcastReceiver() {
 
@@ -25,6 +26,11 @@ class TodoReminderReceiver : BroadcastReceiver() {
         val todoTitle = intent.getStringExtra(
             EXTRA_TODO_TITLE
         ) ?: "할 일을 확인하세요."
+
+        clearSnoozeState(
+            context = context,
+            todoId = todoId
+        )
 
         val openAppIntent = Intent(
             context,
@@ -118,7 +124,46 @@ class TodoReminderReceiver : BroadcastReceiver() {
             .from(context)
             .notify(todoId, notification)
     }
+    private fun clearSnoozeState(
+        context: Context,
+        todoId: Int
+    ) {
+        val todoStorage = TodoStorage(
+            context.applicationContext
+        )
 
+        val todos = todoStorage
+            .loadTodos()
+            .toMutableList()
+
+        val index = todos.indexOfFirst {
+            it.id == todoId
+        }
+
+        if (index == -1) {
+            return
+        }
+
+        val todo = todos[index]
+
+        if (todo.snoozedUntilMillis == null) {
+            return
+        }
+
+        todos[index] = todo.copy(
+            snoozedUntilMillis = null
+        )
+
+        todoStorage.saveTodos(todos)
+
+        val updateIntent = Intent(
+            TodoCompleteReceiver.ACTION_TODO_UPDATED
+        ).apply {
+            setPackage(context.packageName)
+        }
+
+        context.sendBroadcast(updateIntent)
+    }
     companion object {
         const val EXTRA_TODO_ID = "todo_id"
         const val EXTRA_TODO_TITLE = "todo_title"
