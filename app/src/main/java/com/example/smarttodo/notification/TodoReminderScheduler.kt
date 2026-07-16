@@ -16,10 +16,15 @@ class TodoReminderScheduler(
         context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     fun schedule(todo: Todo): Boolean {
-        val reminderTimeMillis =
-            calculateReminderTimeMillis(todo) ?: return false
+        val currentTimeMillis = System.currentTimeMillis()
 
-        if (reminderTimeMillis <= System.currentTimeMillis()) {
+        val reminderTimeMillis =
+            todo.snoozedUntilMillis
+                ?.takeIf { it > currentTimeMillis }
+                ?: calculateReminderTimeMillis(todo)
+                ?: return false
+
+        if (reminderTimeMillis <= currentTimeMillis) {
             return false
         }
 
