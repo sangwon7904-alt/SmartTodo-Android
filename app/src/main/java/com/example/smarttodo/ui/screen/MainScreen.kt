@@ -32,9 +32,18 @@ import com.example.smarttodo.util.processTodoList
 import com.example.smarttodo.viewmodel.TodoViewModel
 import com.example.smarttodo.util.calculateTodoProgress
 import kotlinx.coroutines.launch
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import com.example.smarttodo.notification.TodoCompleteReceiver
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
+    val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }
     var todoToDelete by remember { mutableStateOf<Todo?>(null) }
     var searchText by remember { mutableStateOf("") }
@@ -43,6 +52,36 @@ fun MainScreen(todoViewModel: TodoViewModel) {
     val filterOptions = listOf("전체", "오늘", "미완료", "완료")
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    DisposableEffect(context, todoViewModel) {
+        val todoUpdateReceiver = object : BroadcastReceiver() {
+            override fun onReceive(
+                receiverContext: Context?,
+                intent: Intent?
+            ) {
+                if (
+                    intent?.action ==
+                    TodoCompleteReceiver.ACTION_TODO_UPDATED
+                ) {
+                    todoViewModel.refreshTodos()
+                }
+            }
+        }
+
+        val intentFilter = IntentFilter(
+            TodoCompleteReceiver.ACTION_TODO_UPDATED
+        )
+
+        ContextCompat.registerReceiver(
+            context,
+            todoUpdateReceiver,
+            intentFilter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+
+        onDispose {
+            context.unregisterReceiver(todoUpdateReceiver)
+        }
+    }
 
     Scaffold(
         snackbarHost = {

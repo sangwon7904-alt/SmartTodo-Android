@@ -114,7 +114,18 @@ class TodoViewModel(
             reminderScheduler.schedule(todo)
         }
     }
+    fun refreshTodos() {
+        val savedTodos = todoStorage.loadTodos()
 
+        todoList.clear()
+        todoList.addAll(savedTodos)
+
+        nextId = if (savedTodos.isEmpty()) {
+            1
+        } else {
+            savedTodos.maxOf { it.id } + 1
+        }
+    }
     private fun saveTodos() {
         todoStorage.saveTodos(todoList)
     }

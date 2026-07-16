@@ -55,6 +55,14 @@ class TodoCompleteReceiver : BroadcastReceiver() {
 
             todoStorage.saveTodos(todos)
 
+            val updateIntent = Intent(
+                ACTION_TODO_UPDATED
+            ).apply {
+                setPackage(context.packageName)
+            }
+
+            context.sendBroadcast(updateIntent)
+
             TodoReminderScheduler(
                 context.applicationContext
             ).cancel(todoId)
@@ -78,5 +86,8 @@ class TodoCompleteReceiver : BroadcastReceiver() {
 
     companion object {
         const val EXTRA_TODO_ID = "complete_todo_id"
+
+        const val ACTION_TODO_UPDATED =
+            "com.example.smarttodo.action.TODO_UPDATED"
     }
 }
