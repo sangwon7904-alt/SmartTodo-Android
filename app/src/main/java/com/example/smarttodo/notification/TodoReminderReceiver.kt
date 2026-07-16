@@ -43,6 +43,24 @@ class TodoReminderReceiver : BroadcastReceiver() {
                     PendingIntent.FLAG_IMMUTABLE
         )
 
+        val completeIntent = Intent(
+            context,
+            TodoCompleteReceiver::class.java
+        ).apply {
+            putExtra(
+                TodoCompleteReceiver.EXTRA_TODO_ID,
+                todoId
+            )
+        }
+
+        val completePendingIntent = PendingIntent.getBroadcast(
+            context,
+            todoId + COMPLETE_REQUEST_CODE_OFFSET,
+            completeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or
+                    PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(
             context,
             NotificationHelper.CHANNEL_ID
@@ -52,6 +70,11 @@ class TodoReminderReceiver : BroadcastReceiver() {
             .setContentText(todoTitle)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
+            .addAction(
+                android.R.drawable.checkbox_on_background,
+                "완료",
+                completePendingIntent
+            )
             .setAutoCancel(true)
             .build()
 
@@ -72,5 +95,6 @@ class TodoReminderReceiver : BroadcastReceiver() {
     companion object {
         const val EXTRA_TODO_ID = "todo_id"
         const val EXTRA_TODO_TITLE = "todo_title"
+        private const val COMPLETE_REQUEST_CODE_OFFSET = 100_000
     }
 }

@@ -31,6 +31,12 @@
             android:name=".notification.TodoReminderReceiver"
             android:enabled="true"
             android:exported="false" />
+
+        <receiver
+            android:name=".notification.TodoCompleteReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
         <receiver
             android:name=".notification.BootReceiver"
             android:enabled="true"
@@ -40,6 +46,7 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name=".notification.ExactAlarmPermissionReceiver"
             android:enabled="true"
