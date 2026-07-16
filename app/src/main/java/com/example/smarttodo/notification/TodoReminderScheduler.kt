@@ -44,7 +44,39 @@ class TodoReminderScheduler(
 
         return true
     }
+    fun scheduleAt(
+        todoId: Int,
+        todoTitle: String,
+        triggerTimeMillis: Long
+    ): Boolean {
+        if (triggerTimeMillis <= System.currentTimeMillis()) {
+            return false
+        }
 
+        val pendingIntent = createPendingIntent(
+            todoId = todoId,
+            todoTitle = todoTitle
+        )
+
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            !alarmManager.canScheduleExactAlarms()
+        ) {
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerTimeMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerTimeMillis,
+                pendingIntent
+            )
+        }
+
+        return true
+    }
     fun cancel(todoId: Int) {
         val pendingIntent = createPendingIntent(
             todoId = todoId,

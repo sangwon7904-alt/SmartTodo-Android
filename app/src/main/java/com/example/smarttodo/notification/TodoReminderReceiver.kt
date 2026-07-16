@@ -42,6 +42,28 @@ class TodoReminderReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or
                     PendingIntent.FLAG_IMMUTABLE
         )
+        val snoozeIntent = Intent(
+            context,
+            TodoSnoozeReceiver::class.java
+        ).apply {
+            putExtra(
+                TodoSnoozeReceiver.EXTRA_TODO_ID,
+                todoId
+            )
+
+            putExtra(
+                TodoSnoozeReceiver.EXTRA_TODO_TITLE,
+                todoTitle
+            )
+        }
+
+        val snoozePendingIntent = PendingIntent.getBroadcast(
+            context,
+            todoId + SNOOZE_REQUEST_CODE_OFFSET,
+            snoozeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or
+                    PendingIntent.FLAG_IMMUTABLE
+        )
 
         val completeIntent = Intent(
             context,
@@ -75,6 +97,11 @@ class TodoReminderReceiver : BroadcastReceiver() {
                 "완료",
                 completePendingIntent
             )
+            .addAction(
+                android.R.drawable.ic_popup_reminder,
+                "10분 후",
+                snoozePendingIntent
+            )
             .setAutoCancel(true)
             .build()
 
@@ -96,5 +123,6 @@ class TodoReminderReceiver : BroadcastReceiver() {
         const val EXTRA_TODO_ID = "todo_id"
         const val EXTRA_TODO_TITLE = "todo_title"
         private const val COMPLETE_REQUEST_CODE_OFFSET = 100_000
+        private const val SNOOZE_REQUEST_CODE_OFFSET = 200_000
     }
 }
