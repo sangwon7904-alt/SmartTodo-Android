@@ -8,10 +8,10 @@ import java.time.ZoneId
 fun processTodoList(
     todos: List<Todo>,
     searchText: String,
-    selectedFilter: String
+    selectedFilter: String,
+    today: LocalDate = LocalDate.now(),
+    zoneId: ZoneId = ZoneId.systemDefault()
 ): List<Todo> {
-    val today = LocalDate.now()
-    val zoneId = ZoneId.systemDefault()
 
     return todos
         .filter { todo ->
