@@ -40,6 +40,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.kimsangwon.smarttodo.notification.TodoCompleteReceiver
+import com.kimsangwon.smarttodo.ui.components.EmptyTodoView
 
 @Composable
 fun MainScreen(todoViewModel: TodoViewModel) {
@@ -163,20 +164,28 @@ fun MainScreen(todoViewModel: TodoViewModel) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            TodoListSection(
-                todos = sortedTodoList,
-                selectedFilter = selectedFilter,
-                searchText = searchText,
-                onCheckedChange = { todo ->
-                    todoViewModel.toggleTodo(todo)
-                },
-                onTodoClick = { todo ->
-                    todoToEdit = todo
-                },
-                onTodoLongClick = { todo ->
-                    todoToDelete = todo
-                }
-            )
+            if (sortedTodoList.isEmpty()) {
+                EmptyTodoView(
+                    hasAnyTodo = todoViewModel.todoList.isNotEmpty(),
+                    selectedFilter = selectedFilter,
+                    searchText = searchText
+                )
+            } else {
+                TodoListSection(
+                    todos = sortedTodoList,
+                    selectedFilter = selectedFilter,
+                    searchText = searchText,
+                    onCheckedChange = { todo ->
+                        todoViewModel.toggleTodo(todo)
+                    },
+                    onTodoClick = { todo ->
+                        todoToEdit = todo
+                    },
+                    onTodoLongClick = { todo ->
+                        todoToDelete = todo
+                    }
+                )
+            }
         }
         if (showAddDialog) {
             AddTodoDialog(
